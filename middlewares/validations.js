@@ -1,6 +1,6 @@
 const { celebrate, Joi } = require('celebrate');
 const validator = require('validator');
-const BadRequestError = require('../errors/BadRequestError');
+const { BadRequestError } = require('../errors/BadRequestError');
 
 const signIn = celebrate({
   body: Joi.object().keys({
@@ -63,7 +63,7 @@ const createFilmValidation = celebrate({
 
 const filmIdValidation = celebrate({
   params: Joi.object().keys({
-    filmId: Joi.string().required().length(24).hex(),
+    movieId: Joi.string().required().length(24).hex(),
   }),
 });
 
