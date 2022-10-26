@@ -4,26 +4,21 @@ const User = require('../models/user');
 const { BadRequestError } = require('../errors/BadRequestError');
 const { NotFoundError } = require('../errors/NotFoundError');
 const { ConflictError } = require('../errors/ConflictError');
+const { NODE_ENV, JWT_SECRET, JWT_SECRET_DEV } = require('../utils/constants');
 
 module.exports.createUser = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
-    if (!email || !password) {
-      next(new BadRequestError('Неправильный логин или пароль.'));
-    }
-    if (!name) {
-      next(new BadRequestError('Введите имя.'));
-    }
     const user = await User.findOne({ email });
     if (user) {
-      next(new ConflictError(`Пользователь с ${email} уже существует.`));
+      return next(new ConflictError(`Пользователь с ${email} уже существует.`));
     }
 
     const hash = await bcrypt.hash(password, 10);
     const newUser = await User.create({
       email,
       password: hash,
-      name: req.body.name,
+      name,
     });
     return res.status(200).send({
       name: newUser.name,
@@ -32,7 +27,7 @@ module.exports.createUser = async (req, res, next) => {
     });
   } catch (err) {
     if (err.name === 'ValidationError') {
-      next(new BadRequestError('Переданы неверные данные.'));
+      return next(new BadRequestError('Переданы неверные данные.'));
     }
     return next(err);
   }
@@ -48,7 +43,7 @@ module.exports.login = async (req, res, next) => {
     if (user) {
       const token = jwt.sign(
         { _id: user._id },
-        'some-secret-key',
+        NODE_ENV === 'production' ? JWT_SECRET : JWT_SECRET_DEV,
         {
           expiresIn: '7d',
         },
@@ -91,7 +86,7 @@ module.exports.updateUser = async (req, res, next) => {
     });
   } catch (err) {
     if (err.name === 'ValidationError') {
-      next(new BadRequestError('Неверный тип данных.'));
+      return next(new BadRequestError('Неверный тип данных.'));
     }
     return next(err);
   }

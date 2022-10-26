@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
@@ -8,12 +9,16 @@ const errorHandler = require('./middlewares/errorHandler');
 const router = require('./routes');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 // const { NotFoundError } = require('./errors/NotFoundError');
-// Слушаем 3000 порт
-const { PORT = 3000 } = process.env;
+const {
+  PORT,
+  NODE_ENV,
+  MONGO_URL,
+  MONGO_URL_DEV,
+} = require('./utils/constants');
 
 const app = express();
 
-mongoose.connect('mongodb://localhost:27017/moviesdb', {
+mongoose.connect(NODE_ENV === 'production' ? MONGO_URL : MONGO_URL_DEV, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
