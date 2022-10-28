@@ -26,6 +26,9 @@ module.exports.createUser = async (req, res, next) => {
       email: newUser.email,
     });
   } catch (err) {
+    if (err.code === 11000) {
+      next(new ConflictError('Пользователь с данным email уже существует'));
+    } else
     if (err.name === 'ValidationError') {
       return next(new BadRequestError('Переданы неверные данные.'));
     }
@@ -36,9 +39,6 @@ module.exports.createUser = async (req, res, next) => {
 module.exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) {
-      return next(new BadRequestError('Неверный email или пароль.'));
-    }
     const user = await User.findUserByCredentials(email, password);
     if (user) {
       const token = jwt.sign(
@@ -85,6 +85,9 @@ module.exports.updateUser = async (req, res, next) => {
       email: user.email,
     });
   } catch (err) {
+    if (err.code === 11000) {
+      next(new ConflictError('Пользователь с данным email уже существует'));
+    } else
     if (err.name === 'ValidationError') {
       return next(new BadRequestError('Неверный тип данных.'));
     }

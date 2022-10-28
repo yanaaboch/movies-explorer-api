@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const { errors } = require('celebrate');
-const rateLimit = require('express-rate-limit');
+const { limiter } = require('./utils/limiter');
 const errorHandler = require('./middlewares/errorHandler');
 const router = require('./routes');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
@@ -28,12 +28,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(requestLogger);
 
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  standardHeaders: true,
-  legacyHeaders: false,
-});
 app.use(limiter);
 
 app.use(helmet());

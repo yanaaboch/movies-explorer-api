@@ -17,33 +17,8 @@ module.exports.getMovies = async (req, res, next) => {
 
 module.exports.addMovie = async (req, res, next) => {
   try {
-    const {
-      country,
-      director,
-      duration,
-      year,
-      description,
-      image,
-      trailerLink,
-      nameRU,
-      nameEN,
-      thumbnail,
-      movieId,
-    } = req.body;
-    const newMovie = await Movie.create({
-      country,
-      director,
-      duration,
-      year,
-      description,
-      image,
-      trailerLink,
-      nameRU,
-      nameEN,
-      thumbnail,
-      movieId,
-      owner: req.user._id,
-    });
+    const data = { ...req.body };
+    const newMovie = await Movie.create({ ...data, owner: req.user._id });
     return res.status(200).send(newMovie);
   } catch (err) {
     if (err.name === 'ValidationError') {
@@ -65,11 +40,8 @@ module.exports.deleteMovie = async (req, res, next) => {
     if (movieOwnerId !== userId) {
       return next(new ForbiddenError('Вы не можете удалить чужой фильм!'));
     }
-    const deletedMovie = await Movie.findByIdAndRemove(movieId);
-    if (!deletedMovie) {
-      return next(new NotFoundError('Фильм не найден.'));
-    }
-    return res.status(200).send('Фильм успешно удален!');
+    await Movie.findByIdAndRemove(movieId);
+    return res.status(200).send({ message: 'Фильм успешно удален!' });
   } catch (err) {
     return next(err);
   }
