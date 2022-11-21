@@ -28,7 +28,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(cors({
-  origin: 'http://movies.yanaaboch.nomoredomains.icu',
+  origin: 'http://movies.yanaaboch.nomoredomains.club',
   credentials: true,
 }));
 
