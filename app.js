@@ -1,51 +1,39 @@
 require('dotenv').config();
+
+const process = require('process');
 const express = require('express');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
+
+const rateLimit = require('express-rate-limit');
 const cors = require('cors');
 const helmet = require('helmet');
 const { errors } = require('celebrate');
-// const cors = require('./middlewares/cors');
-const { limiter } = require('./utils/limiter');
-const errorHandler = require('./middlewares/errorHandler');
-const router = require('./routes');
-const { requestLogger, errorLogger } = require('./middlewares/logger');
-// const { NotFoundError } = require('./errors/NotFoundError');
-const {
-  PORT,
-  NODE_ENV,
-  MONGO_URL,
-  MONGO_URL_DEV,
-} = require('./utils/constants');
+const { requestLogger, errorLogger } = require('./src/middlewares/logger');
+const { corsOptions, limiterOptions } = require('./src/utils/constants');
+const { routes } = require('./src/routes/index');
+const centralizedErrorHandling = require('./src/middlewares/centralized-error-handling');
+
+const { PORT_DEV, MONGO_URL_DEV } = require('./src/utils/config');
+
+const { PORT = PORT_DEV, MONGO_URL = MONGO_URL_DEV } = process.env;
 
 const app = express();
 
-mongoose.connect(NODE_ENV === 'production' ? MONGO_URL : MONGO_URL_DEV, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-app.use(cors({
-  origin: '*',
-  credentials: true,
-}));
-
 app.use(requestLogger);
-
-app.use(limiter);
-
+app.use(rateLimit(limiterOptions));
+app.use(cors(corsOptions));
 app.use(helmet());
-app.use(router);
+
+app.use(express.json());
+app.use(routes);
 
 app.use(errorLogger);
-
 app.use(errors());
-app.use(errorHandler);
+app.use(centralizedErrorHandling);
 
-app.listen(PORT, () => {
-  // Если всё работает, консоль покажет, какой порт приложение слушает
-  console.log(`App listening on port ${PORT}`);
-});
+async function main() {
+  await mongoose.connect(MONGO_URL);
+  await app.listen(PORT);
+}
+
+main();

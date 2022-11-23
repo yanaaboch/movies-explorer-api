@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
-const isURL = require('validator/lib/isURL');
+const { Schema, model } = require('mongoose');
+const validator = require('validator');
 
-const movieSchema = new mongoose.Schema({
+const movieSchema = new Schema({
   country: {
     type: String,
     required: true,
@@ -26,29 +26,32 @@ const movieSchema = new mongoose.Schema({
     type: String,
     required: true,
     validate: {
-      validator: (v) => isURL(v),
-      message: 'Неправильный формат URL',
+      validator(image) {
+        return validator.isURL(image);
+      },
     },
   },
   trailerLink: {
     type: String,
     required: true,
     validate: {
-      validator: (v) => isURL(v),
-      message: 'Неправильный формат URL',
+      validator(trailerLink) {
+        return validator.isURL(trailerLink);
+      },
     },
   },
   thumbnail: {
     type: String,
     required: true,
     validate: {
-      validator: (v) => isURL(v),
-      message: 'Неправильный формат URL',
+      validator(thumbnail) {
+        return validator.isURL(thumbnail);
+      },
     },
   },
   owner: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'user',
+    type: Schema.Types.ObjectId,
+    req: 'user',
     required: true,
   },
   movieId: {
@@ -65,4 +68,4 @@ const movieSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('movie', movieSchema);
+module.exports.Movie = model('movie', movieSchema);
