@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const helmet = require('helmet');
 const { errors } = require('celebrate');
+// const cors = require('./middlewares/cors');
 const { limiter } = require('./utils/limiter');
 const errorHandler = require('./middlewares/errorHandler');
 const router = require('./routes');
@@ -28,7 +29,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(cors({
-  origin: 'https://movies.yanaaboch.nomoredomains.club',
+  origin: '*',
   credentials: true,
 }));
 

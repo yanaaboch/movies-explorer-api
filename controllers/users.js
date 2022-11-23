@@ -94,3 +94,7 @@ module.exports.updateUser = async (req, res, next) => {
     return next(err);
   }
 };
+
+module.exports.logout = (req, res) => {
+  res.clearCookie('jwt').send({ message: 'Token was deleted from cookies.' });
+};
